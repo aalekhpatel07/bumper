@@ -12,19 +12,23 @@ homepage = "https://rust-wasm.d3r3dd4ykhyyne.amplifyapp.com/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
+name = "bumper"
+path = "src/lib.rs"
 crate-type = ["cdylib"]
 
 [features]
 default = ["client"]
-client = ["js-sys", "wasm-bindgen", "web-sys"]
-socket = ["tokio-tungstenite", "tokio", "tungstenite", "futures-channel", "futures"]
+client = ["js-sys", "wasm-bindgen", "web-sys", "uuid"]
+socket = ["tokio-tungstenite", "tokio", "tungstenite", "futures-channel", "futures", "uuid"]
 
 [dependencies]
 js-sys = { version = "0.3.58", optional = true }
 wasm-bindgen = { version = "0.2.81", optional = true }
 web-sys = { version = "0.3.4", features = ["CanvasRenderingContext2d", "Document", "Element", "Window", "HtmlCanvasElement", "console"], optional = true}
+uuid = { version = "1.1.2", optional = true, features = ["v4", "fast-rng", "js"]}
 serde = { version = "1.0.138", features = ["derive"] }
 serde_json = { version = "1.0.82" }
+serde_derive = { version = "1.0.138" }
 tokio-tungstenite = { version = "0.17.1", optional = true, features = ["native-tls"] }
 tokio = { version = "*", optional = true, features = ["full"] }
 tungstenite = { version = "0.17.2", optional = true}
@@ -33,4 +37,5 @@ futures = { version = "0.3.21", optional = true}
 
 [[bin]]
 name = "server"
+path = "src/main.rs"
 required-features = ["socket"]

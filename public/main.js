@@ -1,8 +1,10 @@
 import init from "./web/bumper.js";
-import { Car } from "./web/bumper.js";
+import { Car, CarView } from "./web/bumper.js";
 
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
+
+let car;
 
 /**
  *
@@ -47,9 +49,14 @@ function registerKeyPresses(car) {
 async function onInit() {
   await setup();
 
-  let car = new Car(100, 100, 30, 50);
-  registerKeyPresses(car);
-  animate(car);
+  // let car = new Car(100, 100, 30, 50);
+  // console.log(car.id);
+  // let view = car.as_view();
+  // console.log(view.toString());
+  setTimeout(() => {
+    registerKeyPresses(car);
+    animate(car);
+  }, 5000);
 }
 
 /**
