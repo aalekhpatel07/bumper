@@ -27,6 +27,7 @@ You may use any `rust` base image with `wasm-pack` installed in it. Here, we use
 ```Dockerfile
 FROM aalekhpatel07/rust:1.0 as base
 COPY . /app
+WORKDIR /app
 RUN wasm-pack build --target web --release --out-dir /app/public/web
 
 FROM python:3 as server
@@ -44,7 +45,7 @@ docker build -f Dockerfile -t bumper:v<version> .
 3. Run the image and bind the port to local machine.
 
 ```sh
-docker run -d -p 8000:8000 bumper:v<version>
+docker run -d --name bumper -p 8000:8000 bumper:v<version>
 ```
 
 4. Navigate to `http://localhost:8000` to access the web app.
