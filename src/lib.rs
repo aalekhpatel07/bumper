@@ -1,3 +1,6 @@
-mod car;
+pub mod client;
+pub mod server;
+pub mod models;
 
-pub use car::*;
+#[cfg(test)]
+pub mod tests;
