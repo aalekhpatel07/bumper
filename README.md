@@ -1,5 +1,7 @@
 # Car Driving Mechanics
 
+[![Cargo (full)](https://github.com/aalekhpatel07/bumper/actions/workflows/cargo.yml/badge.svg)](https://github.com/aalekhpatel07/bumper/actions/workflows/cargo.yml)
+
 ## Building and running
 
 ### Compile the project into Wasm.
