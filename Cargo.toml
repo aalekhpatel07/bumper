@@ -14,7 +14,7 @@ homepage = "https://rust-wasm.d3r3dd4ykhyyne.amplifyapp.com/"
 [lib]
 name = "bumper"
 path = "src/lib.rs"
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "lib"]
 
 [features]
 default = ["client"]
