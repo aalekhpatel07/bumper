@@ -1,12 +1,11 @@
 //! This crate uses the canvas api and provides a way to draw and move a car
 //! given some initial configuration like initial_speed, acceleration, friction, angle, etc.
-//! 
+//!
 //! The car can be moved with the arrow keys.
 
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use web_sys::CanvasRenderingContext2d;
-
 
 #[wasm_bindgen(inspectable)]
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -17,7 +16,7 @@ pub struct CarConfig {
     pub max_speed: f64,
     pub friction: f64,
     pub angle: f64,
-    pub angle_delta: f64
+    pub angle_delta: f64,
 }
 
 impl Default for CarConfig {
@@ -33,7 +32,6 @@ impl Default for CarConfig {
     }
 }
 
-
 impl std::fmt::Display for CarConfig {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "CarConfig {{ speed: {}, acceleration: {}, max_speed: {}, friction: {}, angle: {}, angle_delta: {} }}",
@@ -43,7 +41,6 @@ impl std::fmt::Display for CarConfig {
 
 #[wasm_bindgen]
 impl CarConfig {
-    
     #[wasm_bindgen(constructor)]
     pub fn new(
         speed: f64,
@@ -51,7 +48,7 @@ impl CarConfig {
         max_speed: f64,
         friction: f64,
         angle: f64,
-        angle_delta: f64
+        angle_delta: f64,
     ) -> Self {
         CarConfig {
             speed,
@@ -64,7 +61,6 @@ impl CarConfig {
     }
 }
 
-
 #[wasm_bindgen(inspectable)]
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Car {
@@ -73,17 +69,14 @@ pub struct Car {
     pub width: f64,
     pub height: f64,
     pub config: CarConfig,
-    pub control: Control
+    pub control: Control,
 }
 
 #[wasm_bindgen]
 impl Car {
     #[wasm_bindgen(js_name = "withConfig")]
     pub fn with_config(self, config: CarConfig) -> Self {
-        Car {
-            config,
-            ..self
-        }
+        Car { config, ..self }
     }
     #[wasm_bindgen(constructor)]
     pub fn new(x: f64, y: f64, width: f64, height: f64) -> Car {
@@ -93,7 +86,7 @@ impl Car {
             width,
             height,
             config: CarConfig::default(),
-            control: Control::default()
+            control: Control::default(),
         }
     }
 
@@ -118,28 +111,30 @@ impl Car {
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_forward(&mut self, forward: bool){
+    pub fn set_forward(&mut self, forward: bool) {
         self.control.forward = forward;
     }
     #[wasm_bindgen(setter)]
-    pub fn set_left(&mut self, left: bool){
+    pub fn set_left(&mut self, left: bool) {
         self.control.left = left;
     }
     #[wasm_bindgen(setter)]
-    pub fn set_right(&mut self, right: bool){
+    pub fn set_right(&mut self, right: bool) {
         self.control.right = right;
     }
     #[wasm_bindgen(setter)]
-    pub fn set_reverse(&mut self, reverse: bool){
+    pub fn set_reverse(&mut self, reverse: bool) {
         self.control.reverse = reverse;
     }
 }
 
-
 impl std::fmt::Display for Car {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Car {{ x: {}, y: {}, width: {}, height: {}, config: {} }}",
-               self.x, self.y, self.width, self.height, self.config)
+        write!(
+            f,
+            "Car {{ x: {}, y: {}, width: {}, height: {}, config: {} }}",
+            self.x, self.y, self.width, self.height, self.config
+        )
     }
 }
 
@@ -149,12 +144,11 @@ pub struct Control {
     forward: bool,
     reverse: bool,
     left: bool,
-    right: bool
+    right: bool,
 }
 
 #[wasm_bindgen]
 impl Control {
-
     #[wasm_bindgen(getter)]
     pub fn get_forward(&self) -> bool {
         self.forward
@@ -179,10 +173,9 @@ impl Control {
 #[wasm_bindgen]
 impl Car {
     pub fn update(&mut self) {
-
         if self.control.forward {
             self.config.speed += self.config.acceleration;
-        } 
+        }
         if self.control.reverse {
             self.config.speed -= self.config.acceleration;
         }
@@ -191,8 +184,8 @@ impl Car {
             self.config.speed = self.config.max_speed;
         }
 
-        if self.config.speed < -self.config.max_speed/2. {
-            self.config.speed = -self.config.max_speed/2.;
+        if self.config.speed < -self.config.max_speed / 2. {
+            self.config.speed = -self.config.max_speed / 2.;
         }
 
         if self.config.speed > 0. {
@@ -208,7 +201,7 @@ impl Car {
         }
 
         if self.config.speed != 0. {
-            let flip = if self.config.speed > 0. { 1.} else { -1. };
+            let flip = if self.config.speed > 0. { 1. } else { -1. };
             if self.control.left {
                 self.config.angle += self.config.angle_delta * flip;
             }
@@ -219,7 +212,6 @@ impl Car {
 
         self.x -= self.config.angle.sin() * self.config.speed;
         self.y -= self.config.angle.cos() * self.config.speed;
-
     }
 
     pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
@@ -236,11 +228,10 @@ impl Car {
             -self.width / 2. - TIRE_WIDTH / 2.,
             -self.height / 2. + TIRE_HEIGHT / 2.,
             TIRE_WIDTH,
-            TIRE_HEIGHT
+            TIRE_HEIGHT,
         );
         ctx.set_fill_style(&"#000000".into());
         ctx.fill();
-
 
         // Top right wheel.
         ctx.begin_path();
@@ -248,11 +239,10 @@ impl Car {
             self.width / 2. - TIRE_WIDTH / 2.,
             -self.height / 2. + TIRE_HEIGHT / 2.,
             TIRE_WIDTH,
-            TIRE_HEIGHT
+            TIRE_HEIGHT,
         );
         ctx.set_fill_style(&"#000000".into());
         ctx.fill();
-
 
         // Bottom left wheel.
         ctx.begin_path();
@@ -260,7 +250,7 @@ impl Car {
             -self.width / 2. - TIRE_WIDTH / 2.,
             self.height / 2. - 3. * TIRE_HEIGHT / 2.,
             TIRE_WIDTH,
-            TIRE_HEIGHT
+            TIRE_HEIGHT,
         );
         ctx.set_fill_style(&"#000000".into());
         ctx.fill();
@@ -271,19 +261,14 @@ impl Car {
             self.width / 2. - TIRE_WIDTH / 2.,
             self.height / 2. - 3. * TIRE_HEIGHT / 2.,
             TIRE_WIDTH,
-            TIRE_HEIGHT
+            TIRE_HEIGHT,
         );
         ctx.set_fill_style(&"#000000".into());
         ctx.fill();
 
         // Car body.
         ctx.begin_path();
-        ctx.rect(
-            -self.width / 2.,
-            -self.height / 2.,
-            self.width,
-            self.height
-        );
+        ctx.rect(-self.width / 2., -self.height / 2., self.width, self.height);
         ctx.set_fill_style(&"#659157".into());
         ctx.fill();
 
