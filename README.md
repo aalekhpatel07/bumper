@@ -2,8 +2,17 @@
 
 [![Cargo (full)](https://github.com/aalekhpatel07/bumper/actions/workflows/cargo.yml/badge.svg)](https://github.com/aalekhpatel07/bumper/actions/workflows/cargo.yml)
 
-## Running (from a release)
+## Running
 
+### Docker
+
+A ready docker image is available through `hub.docker.com`:
+
+```sh
+docker run -d --name bumper -p 8000:8000 aalekhpatel07/bumper:<version>
+```
+
+### From a release
 Unzip the contents of the release into a root directory where your web server will serve static files from.
 
 ```sh
