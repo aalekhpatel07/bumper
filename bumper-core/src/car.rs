@@ -1,6 +1,5 @@
-
 use uuid::Uuid;
-use web_sys::CanvasRenderingContext2d;
+// use web_sys::CanvasRenderingContext2d;
 use serde_derive::{Serialize, Deserialize};
 ///
 ///
@@ -64,7 +63,7 @@ impl From<&Car> for CarView {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Car {
-    pub(crate) id: String,
+    pub id: String,
     pub x: f64,
     pub y: f64,
     pub width: f64,
@@ -154,66 +153,67 @@ impl Car {
         self.y -= self.config.angle.cos() * self.config.speed;
     }
 
-    pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
-        ctx.save();
-        ctx.translate(self.x as f64, self.y as f64).unwrap();
-        ctx.rotate(-self.config.angle).unwrap();
+//     pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
+//         ctx.save();
+//         ctx.translate(self.x as f64, self.y as f64).unwrap();
+//         ctx.rotate(-self.config.angle).unwrap();
 
-        const TIRE_WIDTH: f64 = 7.;
-        const TIRE_HEIGHT: f64 = 14.;
+//         const TIRE_WIDTH: f64 = 7.;
+//         const TIRE_HEIGHT: f64 = 14.;
 
-        // Top left wheel.
-        ctx.begin_path();
-        ctx.rect(
-            -self.width / 2. - TIRE_WIDTH / 2.,
-            -self.height / 2. + TIRE_HEIGHT / 2.,
-            TIRE_WIDTH,
-            TIRE_HEIGHT,
-        );
-        ctx.set_fill_style(&"#000000".into());
-        ctx.fill();
+//         // Top left wheel.
+//         ctx.begin_path();
+//         ctx.rect(
+//             -self.width / 2. - TIRE_WIDTH / 2.,
+//             -self.height / 2. + TIRE_HEIGHT / 2.,
+//             TIRE_WIDTH,
+//             TIRE_HEIGHT,
+//         );
+//         ctx.set_fill_style(&"#000000".into());
+//         ctx.fill();
 
-        // Top right wheel.
-        ctx.begin_path();
-        ctx.rect(
-            self.width / 2. - TIRE_WIDTH / 2.,
-            -self.height / 2. + TIRE_HEIGHT / 2.,
-            TIRE_WIDTH,
-            TIRE_HEIGHT,
-        );
-        ctx.set_fill_style(&"#000000".into());
-        ctx.fill();
+//         // Top right wheel.
+//         ctx.begin_path();
+//         ctx.rect(
+//             self.width / 2. - TIRE_WIDTH / 2.,
+//             -self.height / 2. + TIRE_HEIGHT / 2.,
+//             TIRE_WIDTH,
+//             TIRE_HEIGHT,
+//         );
+//         ctx.set_fill_style(&"#000000".into());
+//         ctx.fill();
 
-        // Bottom left wheel.
-        ctx.begin_path();
-        ctx.rect(
-            -self.width / 2. - TIRE_WIDTH / 2.,
-            self.height / 2. - 3. * TIRE_HEIGHT / 2.,
-            TIRE_WIDTH,
-            TIRE_HEIGHT,
-        );
-        ctx.set_fill_style(&"#000000".into());
-        ctx.fill();
+//         // Bottom left wheel.
+//         ctx.begin_path();
+//         ctx.rect(
+//             -self.width / 2. - TIRE_WIDTH / 2.,
+//             self.height / 2. - 3. * TIRE_HEIGHT / 2.,
+//             TIRE_WIDTH,
+//             TIRE_HEIGHT,
+//         );
+//         ctx.set_fill_style(&"#000000".into());
+//         ctx.fill();
 
-        // Bottom right wheel.
-        ctx.begin_path();
-        ctx.rect(
-            self.width / 2. - TIRE_WIDTH / 2.,
-            self.height / 2. - 3. * TIRE_HEIGHT / 2.,
-            TIRE_WIDTH,
-            TIRE_HEIGHT,
-        );
-        ctx.set_fill_style(&"#000000".into());
-        ctx.fill();
+//         // Bottom right wheel.
+//         ctx.begin_path();
+//         ctx.rect(
+//             self.width / 2. - TIRE_WIDTH / 2.,
+//             self.height / 2. - 3. * TIRE_HEIGHT / 2.,
+//             TIRE_WIDTH,
+//             TIRE_HEIGHT,
+//         );
+//         ctx.set_fill_style(&"#000000".into());
+//         ctx.fill();
 
-        // Car body.
-        ctx.begin_path();
-        ctx.rect(-self.width / 2., -self.height / 2., self.width, self.height);
-        ctx.set_fill_style(&"#659157".into());
-        ctx.fill();
+//         // Car body.
+//         ctx.begin_path();
+//         ctx.rect(-self.width / 2., -self.height / 2., self.width, self.height);
+//         ctx.set_fill_style(&"#659157".into());
+//         ctx.fill();
 
-        ctx.restore();
-    }
+//         ctx.restore();
+//     }
+// }
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Default)]
