@@ -35,7 +35,7 @@ impl std::fmt::Display for CarConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Car {
-    pub id: String,
+    // pub id: String,
     pub x: f64,
     pub y: f64,
     pub width: f64,
@@ -49,14 +49,14 @@ impl Car {
     pub fn with_config(self, config: CarConfig) -> Self {
         Car { config, ..self }
     }
-    pub fn with_id(self, id: String) -> Self {
-        Car { id, ..self }
-    }
+    // pub fn with_id(self, id: String) -> Self {
+    //     Car { id, ..self }
+    // }
     pub fn new(
         x: f64, y: f64, width: f64, height: f64
     ) -> Car {
         Car {
-            id: Uuid::new_v4().to_string(),
+            // id: Uuid::new_v4().to_string(),
             x,
             y,
             width,
@@ -78,6 +78,14 @@ impl std::fmt::Display for Car {
         )
     }
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CarView {
+    // pub id: String,
+    pub x: f64,
+    pub y: f64
+}
+
 
 impl Car {
     pub fn update(&mut self) {

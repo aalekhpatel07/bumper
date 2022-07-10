@@ -6,8 +6,6 @@
 // // use serde::{Deserialize, Serialize};
 use serde_derive::{Serialize, Deserialize};
 use wasm_bindgen::prelude::*;
-use web_sys::CanvasRenderingContext2d;
-use uuid::Uuid;
 use bumper_core;
 
 
@@ -36,6 +34,32 @@ impl CarConfig {
             angle_delta,
         })
     }
+
+    #[wasm_bindgen(getter)]
+    pub fn speed(&self) -> f64 {
+        self.0.speed
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn acceleration(&self) -> f64 {
+        self.0.acceleration
+    }
+    #[wasm_bindgen(getter)]
+    pub fn max_speed(&self) -> f64 {
+        self.0.max_speed
+    }
+    #[wasm_bindgen(getter)]
+    pub fn friction(&self) -> f64 {
+        self.0.friction
+    }
+    #[wasm_bindgen(getter)]
+    pub fn angle(&self) -> f64 {
+        self.0.angle
+    }
+    #[wasm_bindgen(getter)]
+    pub fn angle_delta(&self) -> f64 {
+        self.0.angle_delta
+    }
 }
 
 #[wasm_bindgen(inspectable)]
@@ -50,7 +74,7 @@ impl Car {
         x: f64, y: f64, width: f64, height: f64
     ) -> Car {
         Car(bumper_core::Car {
-            id: Uuid::new_v4().to_string(),
+            // id: Uuid::new_v4().to_string(),
             x,
             y,
             width,
@@ -60,74 +84,28 @@ impl Car {
         })
     }
 
+    #[wasm_bindgen(getter)]
+    pub fn config(&self) -> CarConfig {
+        CarConfig(self.0.config)
+    }
+
     pub fn update(&mut self) {
         self.0.update()
     }
 
-    pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
-        ctx.save();
-        ctx.translate(self.0.x as f64, self.0.y as f64).unwrap();
-        ctx.rotate(-self.0.config.angle).unwrap();
+    // #[wasm_bindgen(getter)]
+    // pub fn id(&self) -> String {
+    //     self.0.id.clone()
+    // }
 
-        const TIRE_WIDTH: f64 = 7.;
-        const TIRE_HEIGHT: f64 = 14.;
-
-        // Top left wheel.
-        ctx.begin_path();
-        ctx.rect(
-            -self.0.width / 2. - TIRE_WIDTH / 2.,
-            -self.0.height / 2. + TIRE_HEIGHT / 2.,
-            TIRE_WIDTH,
-            TIRE_HEIGHT,
-        );
-        ctx.set_fill_style(&"#000000".into());
-        ctx.fill();
-
-        // Top right wheel.
-        ctx.begin_path();
-        ctx.rect(
-            self.0.width / 2. - TIRE_WIDTH / 2.,
-            -self.0.height / 2. + TIRE_HEIGHT / 2.,
-            TIRE_WIDTH,
-            TIRE_HEIGHT,
-        );
-        ctx.set_fill_style(&"#000000".into());
-        ctx.fill();
-
-        // Bottom left wheel.
-        ctx.begin_path();
-        ctx.rect(
-            -self.0.width / 2. - TIRE_WIDTH / 2.,
-            self.0.height / 2. - 3. * TIRE_HEIGHT / 2.,
-            TIRE_WIDTH,
-            TIRE_HEIGHT,
-        );
-        ctx.set_fill_style(&"#000000".into());
-        ctx.fill();
-
-        // Bottom right wheel.
-        ctx.begin_path();
-        ctx.rect(
-            self.0.width / 2. - TIRE_WIDTH / 2.,
-            self.0.height / 2. - 3. * TIRE_HEIGHT / 2.,
-            TIRE_WIDTH,
-            TIRE_HEIGHT,
-        );
-        ctx.set_fill_style(&"#000000".into());
-        ctx.fill();
-
-        // Car body.
-        ctx.begin_path();
-        ctx.rect(-self.0.width / 2., -self.0.height / 2., self.0.width, self.0.height);
-        ctx.set_fill_style(&"#659157".into());
-        ctx.fill();
-
-        ctx.restore();
+    #[wasm_bindgen(getter)]
+    pub fn height(&self) -> f64 {
+        self.0.height
     }
 
     #[wasm_bindgen(getter)]
-    pub fn id(&self) -> String {
-        self.0.id.clone()
+    pub fn width(&self) -> f64 {
+        self.0.width
     }
 
     #[wasm_bindgen(getter)]

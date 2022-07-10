@@ -23,9 +23,11 @@ use std::{
     env,
     io::Error as IoError,
     net::SocketAddr,
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex}, str::FromStr,
 };
-use bumper_core::Car;
+use bumper_core::{Car};
+use bumper_server::{CarView};
+use rand::{Rng, thread_rng, prelude::ThreadRng};
 
 // use bumper_core::models::{web, car};
 
@@ -38,15 +40,14 @@ use tungstenite::protocol::Message;
 
 type Tx = UnboundedSender<Message>;
 type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
-type PeerUuidMap = Arc<Mutex<HashMap<SocketAddr, Uuid>>>;
-type UuidCarMap = Arc<Mutex<HashMap<Uuid, Car>>>;
+type PeerCarMap = Arc<Mutex<HashMap<SocketAddr, Car>>>;
+// type UuidCarMap = Arc<Mutex<HashMap<Uuid, Car>>>;
 
 async fn handle_connection(
     peer_map: PeerMap,
-    peer_uuid_map: PeerUuidMap,
-    uuid_car_map: UuidCarMap,
+    peer_car_map: PeerCarMap,
     raw_stream: TcpStream,
-    addr: SocketAddr
+    addr: SocketAddr,
 ) {
     println!("Incoming TCP connection from: {}", addr);
 
@@ -56,15 +57,17 @@ async fn handle_connection(
         .await
         .expect("Error during the websocket handshake occurred");
     println!("WebSocket connection established: {}", addr);
-
-    let car = Car::new(100., 100., 60., 80.);
+    let car = Car::new(100., 100. , 60., 80.);
     // let car_web = web::Car::new(100., 100., 60., 80.);
 
     let car_to_send = serde_json::to_string(&car).unwrap();
 
-    let car_uuid = Uuid::parse_str(&car.id).unwrap();
-    peer_uuid_map.lock().unwrap().insert(addr, car_uuid);
-    uuid_car_map.lock().unwrap().insert(car_uuid, car.clone());
+    // let car_uuid = Uuid::parse_str(&car.id).unwrap();
+    // peer_uuid_map.lock().unwrap().insert(addr, car_uuid);
+    peer_car_map
+    .lock()
+    .unwrap()
+    .insert(addr, car.clone());
 
     // Insert the write part of this peer to the peer map.
     let (tx, rx) = unbounded();
@@ -76,22 +79,38 @@ async fn handle_connection(
     let broadcast_incoming = incoming.try_for_each(|msg| {
         println!("Received a message from {}: {}", addr, msg.to_text().unwrap());
 
+        let self_car_view: CarView = serde_json::from_str(msg.to_text().unwrap()).unwrap();
+        let self_car: Car = self_car_view.into();
+
+        println!("Self car: {:?}", self_car);
+        peer_car_map
+        .lock()
+        .unwrap()
+        .insert(addr, self_car);
+
         let peers = peer_map.lock().unwrap();
 
         // We want to broadcast the message to everyone except ourselves.
         let broadcast_recipients =
-            peers.iter().filter(|(peer_addr, _)| peer_addr != &&addr).map(|(_, ws_sink)| ws_sink);
+            peers
+            .iter()
+            .filter(|(peer_addr, _)| peer_addr != &&addr);
 
-        let all_cars = vec![
-            car.clone(),
-            car.clone()
-        ];
 
-        let cars_to_send = serde_json::to_string(&all_cars).unwrap();
-        // We just learnt of the movement of the peer's car.
+        for (recp_addr, recp_socket) in broadcast_recipients {
+            // let car = peer_car_map.lock().unwrap().get(recp_addr).unwrap();
 
-        for recp in broadcast_recipients {
-            recp.unbounded_send(Message::Text(cars_to_send.clone())).unwrap();
+            let peer_car_map_guard = peer_car_map.lock().unwrap();
+            let recipient_cars = 
+            peer_car_map_guard
+            .iter()
+            .filter(|(peer_addr, _)| peer_addr != &recp_addr)
+            .map(|(peer_addr, peer_car)| (peer_car, peer_addr))
+            .collect::<Vec<_>>();
+
+            let recipient_cars_to_send = serde_json::to_string(&recipient_cars).unwrap();
+
+            recp_socket.unbounded_send(Message::Text(recipient_cars_to_send)).unwrap();
         }
 
         future::ok(())
@@ -105,20 +124,18 @@ async fn handle_connection(
     println!("{} disconnected", &addr);
 
     peer_map.lock().unwrap().remove(&addr);
-    if let Some(car_uuid) = peer_uuid_map.lock().unwrap().get(&addr) {
-        uuid_car_map.lock().unwrap().remove(car_uuid);
-    }
-    peer_uuid_map.lock().unwrap().remove(&addr);
+    // if let Some(car_uuid) = peer_uuid_map.lock().unwrap().get(&addr) {
+    //     uuid_car_map.lock().unwrap().remove(car_uuid);
+    // }
+    peer_car_map.lock().unwrap().remove(&addr);
 
 }
 
 #[tokio::main]
 async fn main() -> Result<(), IoError> {
     let addr = env::args().nth(1).unwrap_or_else(|| "127.0.0.1:8080".to_string());
-
     let peer_map = PeerMap::new(Mutex::new(HashMap::new()));
-    let peer_uuid_map = PeerUuidMap::new(Mutex::new(HashMap::new()));
-    let uuid_car_map = UuidCarMap::new(Mutex::new(HashMap::new()));
+    let peer_car_map = PeerCarMap::new(Mutex::new(HashMap::new()));
 
     // Create the event loop and TCP listener we'll accept connections on.
     let try_socket = TcpListener::bind(&addr).await;
@@ -130,10 +147,9 @@ async fn main() -> Result<(), IoError> {
         tokio::spawn(
             handle_connection(
                 peer_map.clone(),
-                peer_uuid_map.clone(),
-                uuid_car_map.clone(),
+            peer_car_map.clone(),
                 stream,
-                addr
+                addr,
             )
         );
     }

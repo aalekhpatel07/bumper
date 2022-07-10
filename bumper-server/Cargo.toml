@@ -15,6 +15,7 @@ homepage = "https://rust-wasm.d3r3dd4ykhyyne.amplifyapp.com/"
 default = ["tokio-tungstenite", "tokio", "tungstenite", "futures-channel", "futures", "uuid"]
 
 [dependencies]
+rand = "*"
 uuid = { version = "1.1.2", optional = true, features = ["v4", "fast-rng", "js"]}
 serde = { version = "1.0.138", features = ["derive"] }
 serde_json = { version = "1.0.82" }

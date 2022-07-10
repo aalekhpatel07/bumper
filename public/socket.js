@@ -1,14 +1,22 @@
-let worker;
+// let worker;
 let ws;
+let canvas = document.getElementById("canvas");
+
+function createEventDispatcher(elem) {
+  return function (name, data) {
+    let event = new CustomEvent(name, {
+      detail: data,
+    });
+    elem.dispatchEvent(event);
+  };
+}
 
 function attachListener() {
-  let canvas = document.getElementById("canvas");
   if (canvas) {
     console.log("Attaching carMoved to canvas.");
     canvas.addEventListener("carMoved", (e) => {
       const newCar = e.detail;
-      // console.log("from socket: newCar", newCar.toJSON());
-      worker.postMessage(newCar.toJSON());
+      ws.send(JSON.stringify(newCar));
     });
   } else {
     console.log("No canvas found.");
@@ -16,7 +24,7 @@ function attachListener() {
 }
 
 function onOpen(e) {
-  console.log("Websocket open", e);
+  console.log("Websocket open", e, "data", e.data);
 }
 
 function onClose(e) {
@@ -32,15 +40,38 @@ function onMessage(message) {
   let raw = message.data;
   let data = JSON.parse(raw);
 
-  let car = data;
+  if (!Array.isArray(data)) {
+    setTimeout(() => {
+      const dispatch = createEventDispatcher(document.getElementById("canvas"));
+      dispatch("cars", {
+        initial: true,
+        data,
+      });
+    }, 1000);
+  } else {
+    const dispatch = createEventDispatcher(document.getElementById("canvas"));
+    dispatch("cars", {
+      initial: false,
+      data,
+    });
+  }
+
+  // canvas.dispatchEvent("cars", {
+  //   detail: {
+  //     initial: false,
+  //     data,
+  //   },
+  // });
+  // if (data) {
+  //   data.forEach(([car, id]) => {
+  //     console.log("car", car);
+  //     console.log("id", id);
+  //   });
+  // }
   // data.forEach();
 
   console.log("Websocket message: " + raw, data);
-  console.log(car);
-
-  setInterval(() => {
-    ws.send(JSON.stringify({ hello: "world" }));
-  }, 1000);
+  // console.log(car);
 }
 
 function onError(e) {
@@ -49,7 +80,6 @@ function onError(e) {
 
 async function createConnection() {
   ws = new WebSocket("ws://localhost:8080/");
-  console.log(ws);
   ws.onopen = onOpen;
   ws.onclose = onClose;
   ws.onmessage = onMessage;
@@ -59,7 +89,7 @@ async function createConnection() {
 function init() {
   createConnection();
   attachListener();
-  worker = new Worker("workers/example.js");
+  // worker = new Worker("workers/example.js");
 }
 
 init();
