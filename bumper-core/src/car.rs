@@ -1,12 +1,11 @@
 use uuid::Uuid;
-// use web_sys::CanvasRenderingContext2d;
 use serde_derive::{Serialize, Deserialize};
+
 ///
 ///
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct CarConfig {
     pub speed: f64,
-
     pub acceleration: f64,
     pub max_speed: f64,
     pub friction: f64,
@@ -19,7 +18,7 @@ impl Default for CarConfig {
         CarConfig {
             speed: 0.0,
             acceleration: 0.2,
-            max_speed: 3.0,
+            max_speed: 10.0,
             friction: 0.05,
             angle: 0.0,
             angle_delta: 0.03,
@@ -31,33 +30,6 @@ impl std::fmt::Display for CarConfig {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "CarConfig {{ speed: {}, acceleration: {}, max_speed: {}, friction: {}, angle: {}, angle_delta: {} }}",
                self.speed, self.acceleration, self.max_speed, self.friction, self.angle, self.angle_delta)
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CarView {
-    pub(crate) id: String,
-    pub x: f64,
-    pub y: f64
-}
-
-impl CarView {
-    pub fn new(id: &str, x: f64, y: f64) -> Self {
-        CarView {
-            id: id.into(),
-            x,
-            y
-        }
-    }
-}
-
-impl From<&Car> for CarView {
-    fn from(car: &Car) -> Self {
-        CarView {
-            id: car.id.clone(),
-            x: car.x,
-            y: car.y
-        }
     }
 }
 
@@ -92,9 +64,6 @@ impl Car {
             config: CarConfig::default(),
             control: Control::default(),
         }
-    }
-    pub fn as_view(&self) -> CarView {
-        self.into()
     }
 
 }
@@ -153,73 +122,13 @@ impl Car {
         self.y -= self.config.angle.cos() * self.config.speed;
     }
 
-//     pub fn draw(&self, ctx: &CanvasRenderingContext2d) {
-//         ctx.save();
-//         ctx.translate(self.x as f64, self.y as f64).unwrap();
-//         ctx.rotate(-self.config.angle).unwrap();
-
-//         const TIRE_WIDTH: f64 = 7.;
-//         const TIRE_HEIGHT: f64 = 14.;
-
-//         // Top left wheel.
-//         ctx.begin_path();
-//         ctx.rect(
-//             -self.width / 2. - TIRE_WIDTH / 2.,
-//             -self.height / 2. + TIRE_HEIGHT / 2.,
-//             TIRE_WIDTH,
-//             TIRE_HEIGHT,
-//         );
-//         ctx.set_fill_style(&"#000000".into());
-//         ctx.fill();
-
-//         // Top right wheel.
-//         ctx.begin_path();
-//         ctx.rect(
-//             self.width / 2. - TIRE_WIDTH / 2.,
-//             -self.height / 2. + TIRE_HEIGHT / 2.,
-//             TIRE_WIDTH,
-//             TIRE_HEIGHT,
-//         );
-//         ctx.set_fill_style(&"#000000".into());
-//         ctx.fill();
-
-//         // Bottom left wheel.
-//         ctx.begin_path();
-//         ctx.rect(
-//             -self.width / 2. - TIRE_WIDTH / 2.,
-//             self.height / 2. - 3. * TIRE_HEIGHT / 2.,
-//             TIRE_WIDTH,
-//             TIRE_HEIGHT,
-//         );
-//         ctx.set_fill_style(&"#000000".into());
-//         ctx.fill();
-
-//         // Bottom right wheel.
-//         ctx.begin_path();
-//         ctx.rect(
-//             self.width / 2. - TIRE_WIDTH / 2.,
-//             self.height / 2. - 3. * TIRE_HEIGHT / 2.,
-//             TIRE_WIDTH,
-//             TIRE_HEIGHT,
-//         );
-//         ctx.set_fill_style(&"#000000".into());
-//         ctx.fill();
-
-//         // Car body.
-//         ctx.begin_path();
-//         ctx.rect(-self.width / 2., -self.height / 2., self.width, self.height);
-//         ctx.set_fill_style(&"#659157".into());
-//         ctx.fill();
-
-//         ctx.restore();
-//     }
 // }
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Default)]
 pub struct Control {
-    pub(crate) forward: bool,
-    pub(crate) reverse: bool,
-    pub(crate) left: bool,
-    pub(crate) right: bool,
+    pub forward: bool,
+    pub reverse: bool,
+    pub left: bool,
+    pub right: bool,
 }

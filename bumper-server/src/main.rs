@@ -25,6 +25,8 @@ use std::{
     net::SocketAddr,
     sync::{Arc, Mutex},
 };
+use bumper_core::Car;
+
 // use bumper_core::models::{web, car};
 
 use futures::{TryStreamExt, StreamExt, future, pin_mut};
@@ -36,13 +38,13 @@ use tungstenite::protocol::Message;
 
 type Tx = UnboundedSender<Message>;
 type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
-// type PeerUuidMap = Arc<Mutex<HashMap<SocketAddr, Uuid>>>;
-// type UuidCarMap = Arc<Mutex<HashMap<Uuid, car::Car>>>;
+type PeerUuidMap = Arc<Mutex<HashMap<SocketAddr, Uuid>>>;
+type UuidCarMap = Arc<Mutex<HashMap<Uuid, Car>>>;
 
 async fn handle_connection(
     peer_map: PeerMap,
-    // peer_uuid_map: PeerUuidMap,
-    // uuid_car_map: UuidCarMap,
+    peer_uuid_map: PeerUuidMap,
+    uuid_car_map: UuidCarMap,
     raw_stream: TcpStream,
     addr: SocketAddr
 ) {
@@ -55,20 +57,19 @@ async fn handle_connection(
         .expect("Error during the websocket handshake occurred");
     println!("WebSocket connection established: {}", addr);
 
-    // let car = car::Car::new(100., 100., 60., 80.);
+    let car = Car::new(100., 100., 60., 80.);
     // let car_web = web::Car::new(100., 100., 60., 80.);
-    // let car_web_id = car_web.id();
 
-    // let car_to_send = serde_json::to_string(&car_web).unwrap();
-    // let car_uuid = uuid!(car_web_id);
+    let car_to_send = serde_json::to_string(&car).unwrap();
 
-    // peer_uuid_map.lock().unwrap().insert(addr, car_uuid);
-    // uuid_car_map.lock().unwrap().insert(car_uuid, car);
+    let car_uuid = Uuid::parse_str(&car.id).unwrap();
+    peer_uuid_map.lock().unwrap().insert(addr, car_uuid);
+    uuid_car_map.lock().unwrap().insert(car_uuid, car.clone());
 
     // Insert the write part of this peer to the peer map.
     let (tx, rx) = unbounded();
+    tx.unbounded_send(Message::Text(car_to_send)).unwrap();
     peer_map.lock().unwrap().insert(addr, tx);
-    // tx.unbounded_send(Message::Text(car_to_send)).unwrap();
 
     let (outgoing, incoming) = ws_stream.split();
 
@@ -81,16 +82,16 @@ async fn handle_connection(
         let broadcast_recipients =
             peers.iter().filter(|(peer_addr, _)| peer_addr != &&addr).map(|(_, ws_sink)| ws_sink);
 
-        // let all_cars = vec![
-        //     car.clone(),
-        //     car.clone()
-        // ];
+        let all_cars = vec![
+            car.clone(),
+            car.clone()
+        ];
 
-        // let cars_to_send = serde_json::to_string(&all_cars).unwrap();
+        let cars_to_send = serde_json::to_string(&all_cars).unwrap();
         // We just learnt of the movement of the peer's car.
 
         for recp in broadcast_recipients {
-            // recp.unbounded_send(Message::Text(cars_to_send.clone())).unwrap();
+            recp.unbounded_send(Message::Text(cars_to_send.clone())).unwrap();
         }
 
         future::ok(())
@@ -104,9 +105,10 @@ async fn handle_connection(
     println!("{} disconnected", &addr);
 
     peer_map.lock().unwrap().remove(&addr);
-    // let car_uuid = peer_uuid_map.lock().unwrap().get(&addr).unwrap();
-    // peer_uuid_map.lock().unwrap().remove(&addr);
-    // uuid_car_map.lock().unwrap().remove(car_uuid);
+    if let Some(car_uuid) = peer_uuid_map.lock().unwrap().get(&addr) {
+        uuid_car_map.lock().unwrap().remove(car_uuid);
+    }
+    peer_uuid_map.lock().unwrap().remove(&addr);
 
 }
 
@@ -115,8 +117,8 @@ async fn main() -> Result<(), IoError> {
     let addr = env::args().nth(1).unwrap_or_else(|| "127.0.0.1:8080".to_string());
 
     let peer_map = PeerMap::new(Mutex::new(HashMap::new()));
-    // let peer_uuid_map = PeerUuidMap::new(Mutex::new(HashMap::new()));
-    // let uuid_car_map = UuidCarMap::new(Mutex::new(HashMap::new()));
+    let peer_uuid_map = PeerUuidMap::new(Mutex::new(HashMap::new()));
+    let uuid_car_map = UuidCarMap::new(Mutex::new(HashMap::new()));
 
     // Create the event loop and TCP listener we'll accept connections on.
     let try_socket = TcpListener::bind(&addr).await;
@@ -128,8 +130,8 @@ async fn main() -> Result<(), IoError> {
         tokio::spawn(
             handle_connection(
                 peer_map.clone(),
-                // peer_uuid_map.clone(),
-                // uuid_car_map.clone(),
+                peer_uuid_map.clone(),
+                uuid_car_map.clone(),
                 stream,
                 addr
             )

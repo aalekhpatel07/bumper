@@ -1,10 +1,18 @@
-import init from "./web/bumper.js";
-import { Car, CarView } from "./web/bumper.js";
+import init from "./web/bumper_web.js";
+import { Car } from "./web/bumper_web.js";
 
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 
 let car;
+let currentPos;
+let prevPos;
+
+function dispatchCarMove(c) {
+  const event = new CustomEvent("carMoved", { detail: c });
+  // console.log("car moved! prevPos:", prevPos, "currentPos:", currentPos);
+  canvas.dispatchEvent(event);
+}
 
 /**
  *
@@ -48,8 +56,11 @@ function registerKeyPresses(car) {
 
 async function onInit() {
   await setup();
+  // canvas.dispatchEvent();
 
-  // let car = new Car(100, 100, 30, 50);
+  car = new Car(100, 100, 30, 50);
+  currentPos = { x: car.x, y: car.y };
+  prevPos = { ...currentPos };
   // console.log(car.id);
   // let view = car.as_view();
   // console.log(view.toString());
@@ -65,9 +76,17 @@ async function onInit() {
  */
 function animate(car) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  prevPos = { ...currentPos };
   car.update();
+  currentPos = { x: car.x, y: car.y };
 
+  // console.log("")
+  if (!!(currentPos.x === prevPos.x && currentPos.y === prevPos.y)) {
+    // console.log("currentPos:", currentPos, "prevPos:", prevPos);
+    dispatchCarMove(car);
+  }
   car.draw(ctx);
+
   requestAnimationFrame(() => animate(car));
 }
 
