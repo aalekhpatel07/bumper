@@ -22,8 +22,6 @@ jobs:
       run: cargo nextest run --release --verbose
     - name: Generate test coverage report.
       run: cargo tarpaulin -o Html --output-dir ./target/tarpaulin
-    - name: Run rustfmt
-      run: rustfmt **/*.rs
     - name: Run clippy
       run: cargo clippy --no-deps --fix
     - name: Compile into wasm.
