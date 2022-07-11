@@ -8,6 +8,6 @@ RUN apt-get install python3.9
 
 RUN chmod +x scripts/*
 
-RUN wasm-pack build --target web --release --out-dir public/web
+RUN cd bumper-web && wasm-pack build --target web --release --out-dir /app/public/web
 
 CMD ["/bin/bash", "/app/scripts/entrypoint-dev.sh"]

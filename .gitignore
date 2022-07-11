@@ -2,3 +2,5 @@
 /Cargo.lock
 web
 ./**/web
+.vscode/
+.idea/
