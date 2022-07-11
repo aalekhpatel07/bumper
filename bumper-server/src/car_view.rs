@@ -1,6 +1,5 @@
-use bumper_core::{CarConfig, Car, Control};
-use serde_derive::{Serialize, Deserialize};
-
+use bumper_core::{Car, CarConfig, Control};
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CarView {
@@ -25,12 +24,12 @@ impl From<CarView> for Car {
             config: car_view.config,
             height: car_view.height,
             width: car_view.width,
-            control: Control { 
-                forward: car_view.forward, 
-                reverse: car_view.reverse, 
-                left: car_view.left, 
+            control: Control {
+                forward: car_view.forward,
+                reverse: car_view.reverse,
+                left: car_view.left,
                 right: car_view.right,
-            }
+            },
         }
     }
 }
@@ -44,12 +43,12 @@ impl From<&CarView> for Car {
             config: car_view.config,
             height: car_view.height,
             width: car_view.width,
-            control: Control { 
-                forward: car_view.forward, 
-                reverse: car_view.reverse, 
-                left: car_view.left, 
+            control: Control {
+                forward: car_view.forward,
+                reverse: car_view.reverse,
+                left: car_view.left,
                 right: car_view.right,
-            }
+            },
         }
     }
 }

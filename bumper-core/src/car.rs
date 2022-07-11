@@ -1,6 +1,5 @@
-
-use serde_derive::{Serialize, Deserialize};
 use crate::Rectangle;
+use serde_derive::{Deserialize, Serialize};
 
 ///
 ///
@@ -45,7 +44,6 @@ pub struct Car {
     pub control: Control,
 }
 
-
 impl Car {
     pub fn with_config(self, config: CarConfig) -> Self {
         Car { config, ..self }
@@ -60,9 +58,7 @@ impl Car {
     // pub fn with_id(self, id: String) -> Self {
     //     Car { id, ..self }
     // }
-    pub fn new(
-        x: f64, y: f64, width: f64, height: f64
-    ) -> Car {
+    pub fn new(x: f64, y: f64, width: f64, height: f64) -> Car {
         Car {
             // id: Uuid::new_v4().to_string(),
             x,
@@ -77,9 +73,7 @@ impl Car {
     pub fn json(&self) -> String {
         serde_json::to_string(self).unwrap()
     }
-
 }
-
 
 impl std::fmt::Display for Car {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -137,7 +131,6 @@ impl Car {
             if self.control.right {
                 self.config.angle -= self.config.angle_delta * flip;
             }
-
         }
         self.config.angle = self.config.angle.rem_euclid(2. * std::f64::consts::PI);
         self.x -= self.config.angle.sin() * self.config.speed;
@@ -159,11 +152,11 @@ impl Car {
     pub fn collides_position(&self, car_position: &CarPosition) -> bool {
         let self_hitbox: Rectangle = self.into();
         let car_hitbox: Rectangle = Rectangle::new(
-            car_position.x, 
-            car_position.y, 
-            car_position.width, 
-            car_position.height, 
-            car_position.angle
+            car_position.x,
+            car_position.y,
+            car_position.width,
+            car_position.height,
+            car_position.angle,
         );
         self_hitbox.intersects(&car_hitbox)
     }
@@ -176,7 +169,7 @@ impl From<&Car> for Rectangle {
             y: car.y,
             width: car.width,
             height: car.height,
-            angle: car.config.angle.rem_euclid(std::f64::consts::TAU)
+            angle: car.config.angle.rem_euclid(std::f64::consts::TAU),
         }
     }
 }
@@ -188,7 +181,7 @@ impl From<&CarView> for Rectangle {
             y: car_view.y,
             width: car_view.width,
             height: car_view.height,
-            angle: car_view.config.angle.rem_euclid(std::f64::consts::TAU)
+            angle: car_view.config.angle.rem_euclid(std::f64::consts::TAU),
         }
     }
 }
@@ -201,7 +194,6 @@ pub struct Control {
     pub right: bool,
 }
 
-
 #[cfg(test)]
 pub mod tests {
     use super::Car;
@@ -213,9 +205,6 @@ pub mod tests {
         assert!(car1.collides(&car2));
     }
 }
-
-
-
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CarView {
@@ -240,12 +229,12 @@ impl From<CarView> for Car {
             config: car_view.config,
             height: car_view.height,
             width: car_view.width,
-            control: Control { 
-                forward: car_view.forward, 
-                reverse: car_view.reverse, 
-                left: car_view.left, 
+            control: Control {
+                forward: car_view.forward,
+                reverse: car_view.reverse,
+                left: car_view.left,
                 right: car_view.right,
-            }
+            },
         }
     }
 }
@@ -259,12 +248,12 @@ impl From<&CarView> for Car {
             config: car_view.config,
             height: car_view.height,
             width: car_view.width,
-            control: Control { 
-                forward: car_view.forward, 
-                reverse: car_view.reverse, 
-                left: car_view.left, 
+            control: Control {
+                forward: car_view.forward,
+                reverse: car_view.reverse,
+                left: car_view.left,
                 right: car_view.right,
-            }
+            },
         }
     }
 }

@@ -4,7 +4,7 @@ pub struct Rectangle {
     pub y: f64,
     pub width: f64,
     pub height: f64,
-    pub angle: f64
+    pub angle: f64,
 }
 
 impl Rectangle {
@@ -14,29 +14,33 @@ impl Rectangle {
             y,
             width,
             height,
-            angle
+            angle,
         }
     }
 
     pub fn vertices(&self) -> Vec<Corner> {
-
         let offsets = [
-            (self.width/2., self.height/2.),
-            (self.width/2., -self.height/2.),
-            (-self.width/2., -self.height/2.),
-            (-self.width/2., self.height/2.),
+            (self.width / 2., self.height / 2.),
+            (self.width / 2., -self.height / 2.),
+            (-self.width / 2., -self.height / 2.),
+            (-self.width / 2., self.height / 2.),
         ];
 
         let (cx, cy) = (self.x, self.y);
 
         offsets
-        .iter()
-        .map(|&(x, y)| {
-            let (x, y) = (x * self.angle.cos() - y * self.angle.sin(), x * self.angle.sin() + y * self.angle.cos());
-            Corner { x: cx + x, y: cy + y }
-        })
-        .collect::<Vec<Corner>>()
-
+            .iter()
+            .map(|&(x, y)| {
+                let (x, y) = (
+                    x * self.angle.cos() - y * self.angle.sin(),
+                    x * self.angle.sin() + y * self.angle.cos(),
+                );
+                Corner {
+                    x: cx + x,
+                    y: cy + y,
+                }
+            })
+            .collect::<Vec<Corner>>()
     }
 
     pub fn edges(&self) -> Vec<Edge> {
@@ -46,7 +50,7 @@ impl Rectangle {
         for i in 0..vertices.len() {
             let edge = Edge {
                 start: vertices[i],
-                end: vertices[(i + 1) % vertices.len()]
+                end: vertices[(i + 1) % vertices.len()],
             };
             edges.push(edge);
         }
@@ -75,7 +79,6 @@ impl Rectangle {
             if max_a < min_b || max_b < min_a {
                 return false;
             }
-
         }
         for edge in rect.edges() {
             let normal = edge.normal();
@@ -101,7 +104,7 @@ impl Rectangle {
 #[derive(Debug, Clone, Copy)]
 pub struct Corner {
     pub x: f64,
-    pub y: f64
+    pub y: f64,
 }
 
 impl std::fmt::Display for Corner {
@@ -113,7 +116,7 @@ impl std::fmt::Display for Corner {
 #[derive(Debug, Clone, Copy)]
 pub struct Edge {
     pub start: Corner,
-    pub end: Corner
+    pub end: Corner,
 }
 
 impl Edge {
@@ -125,7 +128,10 @@ impl Edge {
         }
     }
     pub fn normal(&self) -> Corner {
-        Corner { y: self.end.y - self.start.y, x: self.start.x - self.end.x }
+        Corner {
+            y: self.end.y - self.start.y,
+            x: self.start.x - self.end.x,
+        }
     }
 
     pub fn y_intercept(&self) -> f64 {
@@ -141,9 +147,21 @@ impl Edge {
 impl std::fmt::Display for Edge {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.slope() == f64::INFINITY {
-            write!(f, "Edge({{ start: {:.4}, end: {:.4} }}) (Line: x = {:.4})", self.start, self.end, self.start.x)
+            write!(
+                f,
+                "Edge({{ start: {:.4}, end: {:.4} }}) (Line: x = {:.4})",
+                self.start, self.end, self.start.x
+            )
         } else {
-            write!(f, "Edge({{ start: {:.4}, end: {:.4}, normal: {} }}) (Line: y = {:.4} * x +  {:.4})", self.start, self.end, self.normal(), self.slope(), self.y_intercept())
+            write!(
+                f,
+                "Edge({{ start: {:.4}, end: {:.4}, normal: {} }}) (Line: y = {:.4} * x +  {:.4})",
+                self.start,
+                self.end,
+                self.normal(),
+                self.slope(),
+                self.y_intercept()
+            )
         }
     }
 }

@@ -6,17 +6,14 @@
 #![allow(clippy::too_many_arguments)]
 
 // // use serde::{Deserialize, Serialize};
-use serde_derive::{Serialize, Deserialize};
+use serde_derive::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
-
-
-#[wasm_bindgen(inspectable, js_name="CarConfig")]
+#[wasm_bindgen(inspectable, js_name = "CarConfig")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CarConfig(bumper_core::CarConfig);
 
-
-#[wasm_bindgen(inspectable, js_name="CarConfig")]
+#[wasm_bindgen(inspectable, js_name = "CarConfig")]
 impl CarConfig {
     #[wasm_bindgen(constructor)]
     pub fn new(
@@ -73,7 +70,7 @@ impl CarConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CarView(bumper_core::CarView);
 
-#[wasm_bindgen(js_name="CarView")]
+#[wasm_bindgen(js_name = "CarView")]
 impl CarView {
     #[wasm_bindgen(constructor)]
     pub fn new(
@@ -125,11 +122,10 @@ impl CarView {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Car(bumper_core::Car);
 
-
 #[wasm_bindgen(inspectable)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CarPosition(bumper_core::CarPosition);
-#[wasm_bindgen(js_name="CarPosition")]
+#[wasm_bindgen(js_name = "CarPosition")]
 impl CarPosition {
     #[wasm_bindgen(constructor)]
     pub fn new(x: f64, y: f64, width: f64, height: f64, angle: f64) -> Self {
@@ -143,14 +139,10 @@ impl CarPosition {
     }
 }
 
-
-#[wasm_bindgen(js_name="Car")]
+#[wasm_bindgen(js_name = "Car")]
 impl Car {
-
     #[wasm_bindgen(constructor)]
-    pub fn new(
-        x: f64, y: f64, width: f64, height: f64
-    ) -> Car {
+    pub fn new(x: f64, y: f64, width: f64, height: f64) -> Car {
         Car(bumper_core::Car {
             // id: Uuid::new_v4().to_string(),
             x,
@@ -175,12 +167,12 @@ impl Car {
         self.0.collides(&car.0)
     }
 
-    #[wasm_bindgen(js_name="collidesPosition")]
+    #[wasm_bindgen(js_name = "collidesPosition")]
     pub fn collides_position(&self, car_position: &CarPosition) -> bool {
         self.0.collides_position(&car_position.0)
     }
 
-    #[wasm_bindgen(js_name="collidesCarView")]
+    #[wasm_bindgen(js_name = "collidesCarView")]
     pub fn collides_car_view(&self, car_view: &CarView) -> bool {
         self.0.collides_car_view(&car_view.0)
     }

@@ -1,51 +1,48 @@
 use bumper_core::{Car, CarView};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-use std::{net::SocketAddr, ops::Deref};
 use core::hash::Hash;
 use std::sync::{Arc, Mutex};
+use std::{net::SocketAddr, ops::Deref};
 
-
-#[cfg(not(feature = "hashbrown"))]
-use std::collections::HashMap;
 #[cfg(feature = "hashbrown")]
 use hashbrown::HashMap;
+#[cfg(not(feature = "hashbrown"))]
+use std::collections::HashMap;
 
 pub trait Id: Hash + Eq + Clone + Send + Sync + std::fmt::Debug + Serialize {}
 
 impl Id for SocketAddr {}
 
-
 #[derive(Default, Debug, Clone)]
-pub struct BumperCars<I> 
+pub struct BumperCars<I>
 where
-    I: Id
+    I: Id,
 {
     pub players: Arc<Mutex<HashMap<I, Player<I>>>>,
-
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Player<I> 
+pub struct Player<I>
 where
-    I: Id
+    I: Id,
 {
     pub id: I,
-    pub car: Car
+    pub car: Car,
 }
 
-impl<I> Player<I> 
+impl<I> Player<I>
 where
-    I: Id
+    I: Id,
 {
     pub fn new(id: I, car: Car) -> Self {
         Player { id, car }
     }
 }
 
-impl<I> Deref for Player<I> 
+impl<I> Deref for Player<I>
 where
-    I: Id
+    I: Id,
 {
     type Target = Car;
 
@@ -54,21 +51,20 @@ where
     }
 }
 
-impl<I> BumperCars<I> 
+impl<I> BumperCars<I>
 where
-    I: Id
+    I: Id,
 {
     pub fn new() -> Self {
         BumperCars {
             players: Arc::new(Mutex::new(HashMap::new())),
         }
     }
-
 }
 
-pub trait Game<I> 
+pub trait Game<I>
 where
-    I: Id
+    I: Id,
 {
     type Player;
     type PlayerMutation;
@@ -81,10 +77,9 @@ where
     fn create_player(&self, id: I) -> Self::Player;
 }
 
-
-impl<I> Game<I> for BumperCars<I> 
+impl<I> Game<I> for BumperCars<I>
 where
-    I: Id
+    I: Id,
 {
     type Player = Player<I>;
     type PlayerMutation = CarView;
@@ -92,15 +87,13 @@ where
         let players = self.players.lock().expect("Couldn't lock players.");
 
         players
-        .get(&id)
-        .unwrap_or_else(|| panic!("Couldn't get player: {:#?} from game state.", id))
-        .clone()
-        
+            .get(&id)
+            .unwrap_or_else(|| panic!("Couldn't get player: {:#?} from game state.", id))
+            .clone()
     }
     fn add_player(&self, id: I, player: Self::Player) {
         let mut players = self.players.lock().expect("Couldn't lock players.");
         players.insert(id, player);
-
     }
     fn remove_player(&self, id: I) -> Option<Self::Player> {
         let mut players = self.players.lock().expect("Couldn't lock players.");
@@ -109,9 +102,7 @@ where
 
     fn update_player(&self, id: I, player: Self::PlayerMutation) {
         let mut players = self.players.lock().expect("Couldn't lock players.");
-        players
-        .entry(id)
-        .and_modify(|mut v| {
+        players.entry(id).and_modify(|mut v| {
             v.car.x = player.x;
             v.car.y = player.y;
             v.car.control.forward = player.forward;
@@ -123,23 +114,24 @@ where
     }
 
     fn send_game_state_to(&self, id: I) -> String {
-        let players = self.players.lock().expect("Couldn't lock players to send state.");
+        let players = self
+            .players
+            .lock()
+            .expect("Couldn't lock players to send state.");
         let data = players
-        .iter()
-        .filter(|(player_id, _)| player_id != &&id)
-        .map(|(_, player)| player)
-        .collect::<Vec<_>>();
+            .iter()
+            .filter(|(player_id, _)| player_id != &&id)
+            .map(|(_, player)| player)
+            .collect::<Vec<_>>();
         serde_json::to_string(&data).expect("Couldn't serialize players.")
     }
 
     fn send_player_state_to(&self, id: I) -> Option<String> {
-        let players = self.players.lock().expect("Couldn't lock players to send state.");
-        Some(
-            players
-            .get(&id)
-            .unwrap()
-            .json()
-        )
+        let players = self
+            .players
+            .lock()
+            .expect("Couldn't lock players to send state.");
+        Some(players.get(&id).unwrap().json())
     }
 
     fn create_player(&self, id: I) -> Self::Player {
