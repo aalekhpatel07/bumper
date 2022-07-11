@@ -12,10 +12,11 @@ homepage = "https://rust-wasm.d3r3dd4ykhyyne.amplifyapp.com/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["tokio-tungstenite", "tokio", "tungstenite", "futures-channel", "futures", "uuid"]
+default = ["tokio-tungstenite", "tokio", "tungstenite", "futures-channel", "futures", "uuid", "hashbrown"]
 
 [dependencies]
 rand = "*"
+hashbrown = { version = "*", optional = true, features = ["serde"] }
 uuid = { version = "1.1.2", optional = true, features = ["v4", "fast-rng", "js"]}
 serde = { version = "1.0.138", features = ["derive"] }
 serde_json = { version = "1.0.82" }
@@ -26,3 +27,5 @@ tungstenite = { version = "0.17.2", optional = true}
 futures-channel = { version = "0.3.21", optional = true }
 futures = { version = "0.3.21", optional = true}
 bumper-core = { path = "../bumper-core" }
+log = "0.4.17"
+simple_logger = "2.2.0"

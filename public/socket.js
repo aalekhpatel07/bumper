@@ -70,7 +70,7 @@ function onMessage(message) {
   // }
   // data.forEach();
 
-  console.log("Websocket message: " + raw, data);
+  // console.log("Websocket message: " + raw, data);
   // console.log(car);
 }
 

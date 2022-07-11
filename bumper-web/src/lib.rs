@@ -54,7 +54,12 @@ impl CarConfig {
     }
     #[wasm_bindgen(getter)]
     pub fn angle(&self) -> f64 {
-        self.0.angle
+        let val = self.0.angle.rem_euclid(std::f64::consts::TAU) - std::f64::consts::TAU;
+        if (val - std::f64::consts::TAU).abs() < 0.1 {
+            0.0
+        } else {
+            val
+        }
     }
     #[wasm_bindgen(getter)]
     pub fn angle_delta(&self) -> f64 {
@@ -64,7 +69,78 @@ impl CarConfig {
 
 #[wasm_bindgen(inspectable)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CarView(bumper_core::CarView);
+
+#[wasm_bindgen(js_name="CarView")]
+impl CarView {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        x: f64,
+        y: f64,
+        width: f64,
+        height: f64,
+        config: CarConfig,
+        left: bool,
+        right: bool,
+        forward: bool,
+        reverse: bool,
+    ) -> Self {
+        CarView(bumper_core::CarView {
+            x,
+            y,
+            width,
+            height,
+            config: config.0,
+            left,
+            right,
+            forward,
+            reverse,
+        })
+    }
+    #[wasm_bindgen(getter)]
+    pub fn x(&self) -> f64 {
+        self.0.x
+    }
+    #[wasm_bindgen(getter)]
+    pub fn y(&self) -> f64 {
+        self.0.y
+    }
+    #[wasm_bindgen(getter)]
+    pub fn width(&self) -> f64 {
+        self.0.width
+    }
+    #[wasm_bindgen(getter)]
+    pub fn height(&self) -> f64 {
+        self.0.height
+    }
+    #[wasm_bindgen(getter)]
+    pub fn config(&self) -> CarConfig {
+        CarConfig(self.0.config)
+    }
+}
+
+#[wasm_bindgen(inspectable)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Car(bumper_core::Car);
+
+
+#[wasm_bindgen(inspectable)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CarPosition(bumper_core::CarPosition);
+#[wasm_bindgen(js_name="CarPosition")]
+impl CarPosition {
+    #[wasm_bindgen(constructor)]
+    pub fn new(x: f64, y: f64, width: f64, height: f64, angle: f64) -> Self {
+        CarPosition(bumper_core::CarPosition {
+            x,
+            y,
+            width,
+            height,
+            angle,
+        })
+    }
+}
+
 
 #[wasm_bindgen(js_name="Car")]
 impl Car {
@@ -91,6 +167,20 @@ impl Car {
 
     pub fn update(&mut self) {
         self.0.update()
+    }
+
+    pub fn collides(&self, car: &Car) -> bool {
+        self.0.collides(&car.0)
+    }
+
+    #[wasm_bindgen(js_name="collidesPosition")]
+    pub fn collides_position(&self, car_position: &CarPosition) -> bool {
+        self.0.collides_position(&car_position.0)
+    }
+
+    #[wasm_bindgen(js_name="collidesCarView")]
+    pub fn collides_car_view(&self, car_view: &CarView) -> bool {
+        self.0.collides_car_view(&car_view.0)
     }
 
     // #[wasm_bindgen(getter)]

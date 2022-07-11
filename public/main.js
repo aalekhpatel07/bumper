@@ -1,5 +1,5 @@
 import init from "./web/bumper_web.js";
-import { Car } from "./web/bumper_web.js";
+import { Car, CarPosition } from "./web/bumper_web.js";
 
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
@@ -75,10 +75,6 @@ async function onInit() {
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  if (cars) {
-    drawAllCars(cars, ctx);
-  }
-
   if (car) {
     draw(car, ctx);
     car.update();
@@ -86,6 +82,9 @@ function animate() {
     currentPos.y = car.y;
   }
 
+  if (cars) {
+    drawAllCars(cars, ctx);
+  }
   requestAnimationFrame(animate);
 }
 
@@ -112,6 +111,20 @@ async function setup() {
           set: function (target, key, value) {
             if (prevPos.x !== target.x || prevPos.y !== target.y) {
               dispatchCarMove(car);
+              cars.forEach((v, ...rest) => {
+                console.log("v: ", v);
+
+                let position = new CarPosition(
+                  v.x,
+                  v.y,
+                  v.width,
+                  v.height,
+                  v.config.angle
+                );
+                if (car.collidesPosition(position)) {
+                  console.log("Car", car, "collides", v);
+                }
+              });
               prevPos = {
                 x: target.x,
                 y: target.y,
@@ -126,16 +139,18 @@ async function setup() {
         }
       );
 
-      console.log("Setting car:", car);
+      // console.log("Setting car:", car);
     } else {
-      console.log("Not initial:", e.detail);
-      data.forEach(([peerCar, peerId]) => {
-        console.log("peerId", peerId, "peerCar", peerCar);
-        cars.set(peerId, peerCar);
+      // console.log("Not initial:", e.detail);
+
+      cars = new Map();
+      data.forEach((player) => {
+        // console.log("peerId", peerId, "peerCar", peerCar);
+        cars.set(player.id, player.car);
         // cars.insert(peerId, peerCar);
         // registerKeyPresses(peerCar);
       });
-      console.log("cars", cars);
+      // console.log("cars", cars);
     }
   });
 }
