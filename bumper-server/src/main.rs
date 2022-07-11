@@ -27,14 +27,13 @@ use std::{
 
 use bumper_server::{BumperCars, Game};
 
-use log::{info, debug, warn, error};
+use log::{debug, error, info, warn};
 use simple_logger::SimpleLogger;
 
 // use bumper_core::models::{web, car};
 
-use futures::{TryStreamExt, StreamExt, future, pin_mut};
+use futures::{future, pin_mut, StreamExt, TryStreamExt};
 use futures_channel::mpsc::{unbounded, UnboundedSender};
-
 
 use tokio::net::{TcpListener, TcpStream};
 use tungstenite::protocol::Message;
@@ -45,7 +44,10 @@ type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
 // type UuidCarMap = Arc<Mutex<HashMap<Uuid, Car>>>;
 
 pub fn set_up_logging() {
-    SimpleLogger::new().with_level(log::LevelFilter::Debug).init().unwrap();
+    SimpleLogger::new()
+        .with_level(log::LevelFilter::Debug)
+        .init()
+        .unwrap();
 }
 
 async fn handle_connection(
@@ -66,29 +68,26 @@ async fn handle_connection(
     debug!("Creating player: {}", addr);
     game_state.create_player(addr);
 
-
     // Insert the write part of this peer to the peer map.
     let (tx, rx) = unbounded();
 
     debug!("Sending player state to: {}", addr);
-    tx.unbounded_send(
-    Message::Text(
-            game_state
+    tx.unbounded_send(Message::Text(
+        game_state
             .send_player_state_to(addr)
-            .expect("Couldn't create player state.")
-        )
-    ).expect("Couldn't send player state.");
+            .expect("Couldn't create player state."),
+    ))
+    .expect("Couldn't send player state.");
 
     debug!("Game state: {:#?}", game_state.players);
     debug!("Sending game state to {}", addr);
-    tx.unbounded_send(
-        Message::Text(
-            game_state.send_game_state_to(addr)
-            
-        )
-    ).expect("Couldn't send game state to player.");
+    tx.unbounded_send(Message::Text(game_state.send_game_state_to(addr)))
+        .expect("Couldn't send game state to player.");
 
-    peer_map.lock().expect("Failed to lock peer_map").insert(addr, tx);
+    peer_map
+        .lock()
+        .expect("Failed to lock peer_map")
+        .insert(addr, tx);
 
     let (outgoing, incoming) = ws_stream.split();
 
@@ -97,19 +96,14 @@ async fn handle_connection(
 
         if let Ok(self_car_view) = serde_json::from_str(msg.to_text().unwrap()) {
             game_state.update_player(addr, self_car_view);
-        }
-        else {
+        } else {
             warn!("Couldn't parse message: {}", msg.to_text().unwrap());
         }
 
         let peers = peer_map.lock().unwrap();
 
         // We want to broadcast the message to everyone except ourselves.
-        let broadcast_recipients =
-            peers
-            .iter()
-            .filter(|(peer_addr, _)| peer_addr != &&addr);
-
+        let broadcast_recipients = peers.iter().filter(|(peer_addr, _)| peer_addr != &&addr);
 
         for (recp_addr, recp_socket) in broadcast_recipients {
             let to_send = game_state.send_game_state_to(*recp_addr);
@@ -126,25 +120,19 @@ async fn handle_connection(
     let receive_from_others = rx.map(Ok).forward(outgoing);
 
     {
-
         let peers = peer_map.lock().unwrap();
 
         // We want to broadcast the message to everyone except ourselves.
-        let broadcast_recipients =
-            peers
-            .iter()
-            .filter(|(peer_addr, _)| peer_addr != &&addr);
+        let broadcast_recipients = peers.iter().filter(|(peer_addr, _)| peer_addr != &&addr);
 
         for (recp_addr, recp_socket) in broadcast_recipients {
             let to_send = game_state.send_game_state_to(*recp_addr);
             debug!("Sending {} to {}", to_send, recp_addr);
             if let Err(e) = recp_socket.unbounded_send(Message::Text(to_send)) {
-
                 game_state.remove_player(*recp_addr);
                 error!("Failed to send to {}: {}", recp_addr, e);
             }
         }
-
     }
 
     pin_mut!(broadcast_incoming, receive_from_others);
@@ -158,29 +146,25 @@ async fn handle_connection(
         let peers = peer_map.lock().unwrap();
 
         // We want to broadcast the message to everyone except ourselves.
-        let broadcast_recipients =
-            peers
-            .iter()
-            .filter(|(peer_addr, _)| peer_addr != &&addr);
-
+        let broadcast_recipients = peers.iter().filter(|(peer_addr, _)| peer_addr != &&addr);
 
         for (recp_addr, recp_socket) in broadcast_recipients {
             let to_send = game_state.send_game_state_to(*recp_addr);
             debug!("Sending {} to {}", to_send, recp_addr);
             if let Err(e) = recp_socket.unbounded_send(Message::Text(to_send)) {
-
                 game_state.remove_player(*recp_addr);
                 error!("Failed to send to {}: {}", recp_addr, e);
             }
         }
     }
-
 }
 
 #[tokio::main]
 async fn main() -> Result<(), IoError> {
     set_up_logging();
-    let addr = env::args().nth(1).unwrap_or_else(|| "127.0.0.1:8080".to_string());
+    let addr = env::args()
+        .nth(1)
+        .unwrap_or_else(|| "127.0.0.1:8080".to_string());
     let peer_map = PeerMap::new(Mutex::new(HashMap::new()));
     // let peer_car_map = PeerCarMap::new(Mutex::new(HashMap::new()));
     let game_state = BumperCars::new();
@@ -192,14 +176,12 @@ async fn main() -> Result<(), IoError> {
 
     // Let's spawn the handling of each connection in a separate task.
     while let Ok((stream, addr)) = listener.accept().await {
-        tokio::spawn(
-            handle_connection(
-                peer_map.clone(),
-                game_state.clone(),
-                stream,
-                addr,
-            )
-        );
+        tokio::spawn(handle_connection(
+            peer_map.clone(),
+            game_state.clone(),
+            stream,
+            addr,
+        ));
     }
 
     Ok(())
