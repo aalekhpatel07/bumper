@@ -1,4 +1,4 @@
-use uuid::Uuid;
+
 use serde_derive::{Serialize, Deserialize};
 use crate::Rectangle;
 

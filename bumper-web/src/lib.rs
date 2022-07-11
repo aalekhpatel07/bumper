@@ -3,10 +3,12 @@
 // //!
 // //! The car can be moved with the arrow keys.
 
+#![allow(clippy::too_many_arguments)]
+
 // // use serde::{Deserialize, Serialize};
 use serde_derive::{Serialize, Deserialize};
 use wasm_bindgen::prelude::*;
-use bumper_core;
+
 
 
 #[wasm_bindgen(inspectable, js_name="CarConfig")]

@@ -22,12 +22,12 @@ use std::{
     env,
     io::Error as IoError,
     net::SocketAddr,
-    sync::{Arc, Mutex}, str::FromStr,
+    sync::{Arc, Mutex},
 };
-use bumper_core::{Car, CarView};
-use bumper_server::{BumperCars, Player, Id, Game};
-use rand::{Rng, thread_rng, prelude::ThreadRng};
-use log::{info, debug, warn, trace, error};
+
+use bumper_server::{BumperCars, Game};
+
+use log::{info, debug, warn, error};
 use simple_logger::SimpleLogger;
 
 // use bumper_core::models::{web, car};
@@ -35,7 +35,7 @@ use simple_logger::SimpleLogger;
 use futures::{TryStreamExt, StreamExt, future, pin_mut};
 use futures_channel::mpsc::{unbounded, UnboundedSender};
 
-use serde::{Serialize, Deserialize};
+
 use tokio::net::{TcpListener, TcpStream};
 use tungstenite::protocol::Message;
 
@@ -112,10 +112,10 @@ async fn handle_connection(
 
 
         for (recp_addr, recp_socket) in broadcast_recipients {
-            let to_send = game_state.send_game_state_to(recp_addr.clone());
+            let to_send = game_state.send_game_state_to(*recp_addr);
             debug!("Sending {} to {}", to_send, recp_addr);
             if let Err(e) = recp_socket.unbounded_send(Message::Text(to_send)) {
-                game_state.remove_player(recp_addr.clone());
+                game_state.remove_player(*recp_addr);
                 error!("Failed to send to {}: {}", recp_addr, e);
             }
         }
@@ -136,11 +136,11 @@ async fn handle_connection(
             .filter(|(peer_addr, _)| peer_addr != &&addr);
 
         for (recp_addr, recp_socket) in broadcast_recipients {
-            let to_send = game_state.send_game_state_to(recp_addr.clone());
+            let to_send = game_state.send_game_state_to(*recp_addr);
             debug!("Sending {} to {}", to_send, recp_addr);
             if let Err(e) = recp_socket.unbounded_send(Message::Text(to_send)) {
 
-                game_state.remove_player(recp_addr.clone());
+                game_state.remove_player(*recp_addr);
                 error!("Failed to send to {}: {}", recp_addr, e);
             }
         }
@@ -165,11 +165,11 @@ async fn handle_connection(
 
 
         for (recp_addr, recp_socket) in broadcast_recipients {
-            let to_send = game_state.send_game_state_to(recp_addr.clone());
+            let to_send = game_state.send_game_state_to(*recp_addr);
             debug!("Sending {} to {}", to_send, recp_addr);
             if let Err(e) = recp_socket.unbounded_send(Message::Text(to_send)) {
 
-                game_state.remove_player(recp_addr.clone());
+                game_state.remove_player(*recp_addr);
                 error!("Failed to send to {}: {}", recp_addr, e);
             }
         }

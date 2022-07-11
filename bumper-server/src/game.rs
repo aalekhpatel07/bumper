@@ -1,6 +1,6 @@
 use bumper_core::{Car, CarView};
 use serde::{Serialize, Deserialize};
-use uuid::Uuid;
+
 use std::{net::SocketAddr, ops::Deref};
 use core::hash::Hash;
 use std::sync::{Arc, Mutex};
@@ -93,7 +93,7 @@ where
 
         players
         .get(&id)
-        .expect(&format!("Couldn't get player: {:#?} from game state.", id))
+        .unwrap_or_else(|| panic!("Couldn't get player: {:#?} from game state.", id))
         .clone()
         
     }
