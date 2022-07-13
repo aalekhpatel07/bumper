@@ -4,3 +4,4 @@ web
 ./**/web
 .vscode/
 .idea/
+**/*.mp4
