@@ -1,6 +1,7 @@
 import init from "./web/bumper_web.js";
 import { Car, CarPosition } from "./web/bumper_web.js";
 
+let backgroundCanvas = document.getElementById("background");
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 
@@ -88,11 +89,44 @@ function animate() {
   requestAnimationFrame(animate);
 }
 
-async function setup() {
-  let canvas = document.getElementById("canvas");
-  canvas.style.backgroundColor = "maroon";
+/**
+ *
+ * @param {HTMLCanvasElement} canvas
+ */
+function resizeCanvas(canvas) {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+}
+
+/**
+ *
+ * @param {HTMLVideoElement} video
+ * @param {CanvasRenderingContext2D} ctx
+ */
+function drawVideo(video, ctx) {
+  if (video.paused || video.ended) return;
+  ctx.drawImage(video, 0, 0, video.videoWidth / 2, video.videoHeight / 2);
+
+  requestAnimationFrame(() => drawVideo(video, ctx));
+}
+
+async function setup() {
+  let canvas = document.getElementById("canvas");
+  let video = document.getElementById("video");
+  let videoCanvas = document.getElementById("videoCanvas");
+
+  // backgroundCanvas.style.backgroundColor = "maroon";
+  resizeCanvas(backgroundCanvas);
+
+  canvas.style.backgroundColor = "transparent";
+  resizeCanvas(canvas);
+
+  resizeCanvas(videoCanvas);
+  resizeCanvas(video);
+
+  video.addEventListener("play", () => {
+    requestAnimationFrame(() => drawVideo(video, videoCanvas));
+  });
 
   canvas.addEventListener("cars", (e) => {
     const { initial, data } = e.detail;

@@ -7,8 +7,20 @@
 		<title></title>
 	</head>
 	<body>
+		<video 
+			id="video"
+			controls="true"
+			crossorigin="anonymous"
+			src="./assets/big_buck_bunny_720p_10mb.mp4"
+		></video>
+		<canvas id="background"></canvas>
 		<canvas 
 			id="canvas"
+			style="z-index: 50;"
 		></canvas>
+		<canvas 
+			id="videoCanvas"
+		>
+		</canvas>
 	</body>
 </html>

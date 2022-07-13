@@ -3,9 +3,20 @@ body {
     padding: 0;
 }
 
-#canvas {
+canvas {
     position: absolute;
     top: 0;
     left: 0;
     overflow: hidden;
+    display: block;
+    pointer-events: none;
+}
+
+video {
+    display: block;
+    top: 0;
+    position: absolute;
+    left: 0;
+    overflow: hidden;
+    z-index: 20;
 }
