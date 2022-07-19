@@ -3,6 +3,7 @@ members = [
 	"bumper-core",
 	"bumper-web",
 	"bumper-server",
+	"ggpo-core"
 ]
 
 [profile.release]
